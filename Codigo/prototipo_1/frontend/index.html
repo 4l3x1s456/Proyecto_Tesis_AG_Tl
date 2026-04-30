@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>EVA Academico | Mis cursos</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<div class="eva-shell">
+		<header class="top-header">
+			<div class="brand-block">
+				<div class="brand-logo" aria-hidden="true">
+					<svg viewBox="0 0 24 24">
+						<path d="M12 2 4 5v6c0 5 3.4 9.6 8 11 4.6-1.4 8-6 8-11V5l-8-3Zm0 2.1L18 6v4.9c0 4.2-2.7 8-6 9.2-3.3-1.2-6-5-6-9.2V6l6-1.9Zm-3 4.4h6v2H9v-2Zm0 3.5h6v2H9v-2Z" />
+					</svg>
+				</div>
+				<div class="brand-text">
+					<strong>ESPE</strong>
+					<span>Entorno Virtual de Aprendizaje</span>
+				</div>
+			</div>
+
+			<div class="user-panel">
+				<button class="icon-btn" type="button" aria-label="Notificaciones">
+					<svg viewBox="0 0 24 24">
+						<path d="M12 2a6 6 0 0 0-6 6v3.6L4.3 14a1 1 0 0 0 .7 1.7h14a1 1 0 0 0 .7-1.7L18 11.6V8a6 6 0 0 0-6-6Zm0 20a3 3 0 0 0 2.8-2h-5.6a3 3 0 0 0 2.8 2Z" />
+					</svg>
+				</button>
+				<button class="icon-btn" type="button" aria-label="Perfil">
+					<svg viewBox="0 0 24 24">
+						<path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z" />
+					</svg>
+				</button>
+				<span class="user-name">ALEXIS SANTIAGO CHIMBA PORTERO</span>
+				<div class="avatar" aria-hidden="true">AC</div>
+			</div>
+		</header>
+
+		<nav class="main-nav" aria-label="Navegacion principal">
+			<ul class="main-nav-list">
+				<li><a href="#" class="active">Pagina principal</a></li>
+				<li><a href="#">Area personal</a></li>
+				<li><a href="#">Mis cursos</a></li>
+				<li><a href="#">Tablero Kopere</a></li>
+				<li><a href="#">MiEspe</a></li>
+			</ul>
+		</nav>
+
+		<main class="main-content">
+			<section id="courses-view" class="view view-active" aria-labelledby="courses-title">
+				<div class="section-title-block">
+					<h1 id="courses-title">Mis cursos</h1>
+					<p>Vista general del curso</p>
+				</div>
+
+				<div class="filters-row" role="search" aria-label="Filtros de cursos">
+					<label class="field field-small" for="filter-status">
+						<span>Filtro</span>
+						<select id="filter-status" aria-label="Filtro general">
+							<option value="all">Todos</option>
+						</select>
+					</label>
+
+					<label class="field field-search" for="search-input">
+						<span>Buscar</span>
+						<input
+							id="search-input"
+							type="search"
+							placeholder="Buscar por nombre o categoria"
+							autocomplete="off"
+						>
+					</label>
+
+					<label class="field" for="sort-select">
+						<span>Orden</span>
+						<select id="sort-select" aria-label="Ordenar cursos">
+							<option value="name-asc">Ordenar por nombre del curso</option>
+							<option value="name-desc">Ordenar Z-A</option>
+						</select>
+					</label>
+
+					<label class="field field-small" for="view-select">
+						<span>Vista</span>
+						<select id="view-select" aria-label="Tipo de visualizacion">
+							<option value="card">Tarjeta</option>
+							<option value="list" disabled>Lista (proximamente)</option>
+						</select>
+					</label>
+				</div>
+
+				<div id="courses-grid" class="courses-grid" aria-live="polite"></div>
+				<p id="empty-state" class="empty-state hidden">No se encontraron cursos con el criterio ingresado.</p>
+			</section>
+
+			<section id="course-detail-view" class="view" aria-labelledby="detail-title">
+				<div class="detail-top-bar">
+					<button id="back-button" class="back-button" type="button">Volver a Mis cursos</button>
+				</div>
+
+				<div class="course-detail-layout">
+					<article class="course-detail-card">
+						<header class="detail-header">
+							<h2 id="detail-title">Detalle del curso</h2>
+							<p id="detail-category" class="detail-category"></p>
+						</header>
+
+						<p id="detail-description" class="detail-description"></p>
+
+						<div class="detail-sections">
+							<section class="detail-panel" aria-labelledby="units-title">
+								<h3 id="units-title">Unidades</h3>
+								<ul id="detail-units" class="detail-list"></ul>
+							</section>
+
+							<section class="detail-panel" aria-labelledby="resources-title">
+								<h3 id="resources-title">Recursos descargables</h3>
+								<ul id="detail-resources" class="detail-list"></ul>
+							</section>
+						</div>
+					</article>
+
+					<aside class="chatbot-panel" aria-label="Panel para chatbot academico">
+						<h3>Chatbot academico</h3>
+						<p class="chatbot-tagline">Proximamente conectado con IA</p>
+						<p>Este espacio se conectara a un backend con RAG e IA local.</p>
+						<button class="chatbot-button" type="button" disabled>No disponible en esta etapa</button>
+					</aside>
+				</div>
+			</section>
+		</main>
+
+		<footer class="main-footer">
+			<div class="footer-column">
+				<p>Resumen de retencion de datos</p>
+				<p>Descargar la app para dispositivos moviles</p>
+			</div>
+
+			<div class="footer-column">
+				<h4>Contactos - Aulas virtuales</h4>
+				<p>(593) 23989400 extension: 1571</p>
+				<p>Mesa de ayuda</p>
+			</div>
+		</footer>
+	</div>
+
+	<script src="app.js"></script>
+</body>
+</html>

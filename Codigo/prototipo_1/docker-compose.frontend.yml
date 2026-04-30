@@ -1,0 +1,6 @@
+services:
+  frontend:
+    build: .
+    container_name: eva_frontend
+    ports:
+      - "8080:80"
