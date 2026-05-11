@@ -1,0 +1,219 @@
+{
+  "name": "ValidacionIndexacion",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"status\": \"already_indexed\",\n  \"message\": \"El documento ya estaba indexado\",\n  \"document_id\": {{ $json.document_id }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        -144
+      ],
+      "id": "cf6fc9ad-11a2-49ed-a125-fd3b8f1992ec",
+      "name": "Ya existente"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"status\": \"indexed\",\n  \"message\": \"Documento indexado correctamente\",\n  \"indexed_chunks\": {{ $json.indexed_chunks }},\n  \"document_id\": {{ $json.document_id }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        48
+      ],
+      "id": "eaa86669-aad5-426e-ae94-0665ef4d774f",
+      "name": "Nuevo"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -48
+      ],
+      "id": "281ffa1d-8310-4e94-85cb-b39f2eeddb14",
+      "name": "Inicio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "030117d0-94ff-4eae-94c9-3fa0bf537ec6",
+              "name": "course",
+              "value": "Fundamentos de Programación",
+              "type": "string"
+            },
+            {
+              "id": "8f9e9b12-b76f-497e-9c96-505a8f46763c",
+              "name": "source_name",
+              "value": "Guia_FDP_Algoritmos_2026",
+              "type": "string"
+            },
+            {
+              "id": "2964ed43-b10d-4c70-ac9c-665066f43107",
+              "name": "content_text",
+              "value": "En Fundamentos de Programación se introduce el concepto de algoritmo como una serie ordenada de pasos para resolver un problema.  En la unidad 1 se estudian variables, tipos de datos, operadores basicos y estructuras de control como condicionales e iteraciones.  Tambien se explica como representar soluciones usando pseudocodigo y diagramas de flujo.",
+              "type": "string"
+            },
+            {
+              "id": "8fbb0f0d-0673-404e-b109-50d6f97f62f1",
+              "name": "unit",
+              "value": "Unidad 1",
+              "type": "string"
+            },
+            {
+              "id": "68451e45-20bf-4756-8306-2133899e51f2",
+              "name": "tags",
+              "value": "[\"algoritmos\",\"variables\",\"estructuras\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        -48
+      ],
+      "id": "ee74722c-8da3-4f64-b86a-9cd5b7a66585",
+      "name": "valores"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/documents/index",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"course\": \"{{ $json.course }}\",\n  \"source_name\": \"{{ $json.source_name }}\",\n  \"content_text\": \"{{ $json.content_text }}\",\n  \"unit\": \"{{ $json.unit }}\",\n  \"tags\": [\n    \"{{ $json.tags[0] }}\",\n    \"{{ $json.tags[1] }}\",\n    \"{{ $json.tags[2] }}\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        -48
+      ],
+      "id": "eb7e0b1d-e541-4ea2-a910-f9e189aafb69",
+      "name": "conexion y validacion"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7a04c911-04ff-4f74-9504-9b37fd0afd8f",
+              "leftValue": "={{ $json.already_indexed.toString() }}",
+              "rightValue": "=true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        384,
+        -48
+      ],
+      "id": "4e2bca1b-52c9-460b-88b7-43e4ff10c90c",
+      "name": "verificacion"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Inicio": {
+      "main": [
+        [
+          {
+            "node": "valores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "valores": {
+      "main": [
+        [
+          {
+            "node": "conexion y validacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "conexion y validacion": {
+      "main": [
+        [
+          {
+            "node": "verificacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificacion": {
+      "main": [
+        [
+          {
+            "node": "Ya existente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nuevo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c93c4fb4-fe93-45f1-963c-68582fbdded2",
+  "meta": {
+    "instanceId": "d0b50d5f25af84cf043cdac3fdb43c0110719937036e7ded324746f832c10540"
+  },
+  "id": "BSLW8AK8fTY2EGsz",
+  "tags": []
+}

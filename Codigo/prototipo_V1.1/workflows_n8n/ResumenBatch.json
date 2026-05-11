@@ -1,0 +1,1040 @@
+{
+  "name": "ResumenBatch",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -32
+      ],
+      "id": "15f8fa35-9d26-4fbf-b71e-2c1a797fa90a",
+      "name": "inicio"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"cases\": [\n    {\n      \"question\": \"¿Cuál es el objetivo general de Fundamentos de Programación?\",\n      \"course\": \"Fundamentos de Programación\",\n      \"expected_answer\": \"El curso busca desarrollar habilidades para resolver problemas mediante algoritmos, pseudocodigo y programacion basica.\",\n      \"expected_keywords\": [\"algoritmos\", \"pseudocodigo\", \"programacion\"],\n      \"min_sources\": 1\n    },\n    {\n      \"question\": \"¿Qué pasa si una pregunta no está en el material?\",\n      \"course\": \"Fundamentos de Programación\",\n      \"expected_answer\": \"No encontre suficiente informacion en la base de conocimiento para responder tu pregunta.\",\n      \"expected_keywords\": [\"no encontre suficiente informacion\"],\n      \"min_sources\": 0\n    },\n    {\n      \"question\": \"¿Que es un algoritmo en Fundamentos de Programacion?\",\n      \"course\": \"Fundamentos de Programación\",\n      \"expected_answer\": \"Un algoritmo es una secuencia finita de pasos para resolver un problema.\",\n      \"expected_keywords\": [\"algoritmo\", \"secuencia\", \"pasos\", \"problema\"],\n      \"min_sources\": 1\n    },\n    {\n      \"question\": \"¿Que temas se estudian en la unidad 1?\",\n      \"course\": \"Fundamentos de Programación\",\n      \"expected_answer\": \"En la unidad 1 se estudian variables, tipos de datos, operadores basicos, estructuras de control, pseudocodigo y diagramas de flujo.\",\n      \"expected_keywords\": [\"variables\", \"tipos de datos\", \"operadores\", \"pseudocodigo\", \"diagramas de flujo\"],\n      \"min_sources\": 1\n    },\n    {\n      \"question\": \"¿El curso explica como representar soluciones con pseudocodigo?\",\n      \"course\": \"Fundamentos de Programación\",\n      \"expected_answer\": \"Si, el curso explica la representacion de soluciones mediante pseudocodigo y diagramas de flujo.\",\n      \"expected_keywords\": [\"pseudocodigo\", \"diagramas de flujo\", \"representacion\"],\n      \"min_sources\": 1\n    },\n    {\n      \"question\": \"¿Cual es la politica de recuperacion de notas del curso?\",\n      \"course\": \"Fundamentos de Programación\",\n      \"expected_answer\": \"No encontre suficiente informacion en la base de conocimiento para responder tu pregunta.\",\n      \"expected_keywords\": [\"no encontre suficiente informacion\"],\n      \"min_sources\": 0\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        -32
+      ],
+      "id": "c39fb656-1f66-4e7d-9334-01d15a4bdb98",
+      "name": "CasosEvaluacion"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "cases",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -32
+      ],
+      "id": "757e93aa-21e9-4d8a-92bf-53b19fd81582",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"question\": \"{{ $json.question }}\",\n  \"course\": \"{{ $json.course }}\",\n  \"top_k\": 3\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        368,
+        -32
+      ],
+      "id": "8b8c70c4-d4f6-499e-a8b6-8e767846de3e",
+      "name": "HTTP Request /chat"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6be7a988-f7c0-4727-9f72-a49e47ce89f1",
+              "name": "question",
+              "value": "={{ $node[\"Split Out\"].json.question }}",
+              "type": "string"
+            },
+            {
+              "id": "1819ae76-db11-4091-9014-a0e174e3a85e",
+              "name": "course",
+              "value": "={{ $json.course }}",
+              "type": "string"
+            },
+            {
+              "id": "2c30e2f6-949f-4976-b3fe-47127722375a",
+              "name": "expected_answer",
+              "value": "={{ $node[\"Split Out\"].json.expected_answer }}",
+              "type": "string"
+            },
+            {
+              "id": "61f42e1b-27e5-42ca-823b-9b2cca53ab50",
+              "name": "answer",
+              "value": "={{ $json.answer }}",
+              "type": "string"
+            },
+            {
+              "id": "97603bfe-d0ea-4b21-888b-198bfd7d3bb5",
+              "name": "latency_ms",
+              "value": "={{ $json.latency_ms }}",
+              "type": "number"
+            },
+            {
+              "id": "6c41dbb3-9dfb-46f4-ac48-2921de338416",
+              "name": "sources_count",
+              "value": "={{ $json.sources.length }}",
+              "type": "number"
+            },
+            {
+              "id": "fd4b544c-2cf3-4288-ad40-0fdb364ba99b",
+              "name": "has_sources",
+              "value": "={{ $json.sources.length > 0 }}",
+              "type": "boolean"
+            },
+            {
+              "id": "c0e681a3-502d-4f93-ae34-01a4760072d5",
+              "name": "status",
+              "value": "={{ $json.sources.length > 0 ? \"respondido\" : \"sin_contexto\" }}",
+              "type": "string"
+            },
+            {
+              "id": "b38f6781-50ae-4ba7-86a1-5664b8e4f454",
+              "name": "abstained",
+              "value": "={{ $json.abstained }}",
+              "type": "boolean"
+            },
+            {
+              "id": "71ac91e0-3795-45d2-85ed-823d86e235eb",
+              "name": "abstention_reason",
+              "value": "={{ $json.abstention_reason }}",
+              "type": "string"
+            },
+            {
+              "id": "f10970c0-5e46-4c90-b7f0-6c971ba277e7",
+              "name": "best_score",
+              "value": "={{ $json.best_score }}",
+              "type": "number"
+            },
+            {
+              "id": "5d362e2c-545d-41d2-ace9-06c2e0bb5861",
+              "name": "keyword_coverage",
+              "value": "={{ $json.keyword_coverage }}",
+              "type": "number"
+            },
+            {
+              "id": "8cf2abd9-5c3f-4b2e-8bfa-9d68ac884cdd",
+              "name": "sufficient_context",
+              "value": "={{ $json.sufficient_context }}",
+              "type": "boolean"
+            },
+            {
+              "id": "c2cc20ec-d9e5-491f-8fa2-c5b22788fb4c",
+              "name": "expected_keywords_text",
+              "value": "={{ $node[\"Split Out\"].json.expected_keywords.join(\", \") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        -32
+      ],
+      "id": "24374cb6-b0e9-4bd9-b164-5d835d9c1d52",
+      "name": "ResultadoCaso"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0d0526d5-9aad-42fd-a2c2-6107d37ee6b8",
+              "name": "expects_abstention",
+              "value": "={{ $json.expected_answer.toLowerCase().includes(\"no encontre suficiente informacion\") }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        784,
+        -32
+      ],
+      "id": "6e09849a-89e7-48f2-a01a-8c2a8053ec91",
+      "name": "TipoEsperado"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "012ab66a-5f68-4de9-b0ad-8a1a756d51db",
+              "leftValue": "={{ $json.expects_abstention }}",
+              "rightValue": "={{ $('Split Out').item.json.min_sources }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        992,
+        -32
+      ],
+      "id": "3117220f-1445-4533-b6e1-1dd5c5e95ab4",
+      "name": "EvaluarAbstencionEsperada"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee7308b9-2b23-4395-9970-e1486754772e",
+              "name": "evaluation",
+              "value": "failed_hallucinated",
+              "type": "string"
+            },
+            {
+              "id": "ce0e50e9-66e1-450a-9cf8-b1ba074ff241",
+              "name": "reason",
+              "value": "model_answered_when_should_abstain",
+              "type": "string"
+            },
+            {
+              "id": "96b35c13-1b79-4e4e-999e-9885ea2876db",
+              "name": "question",
+              "value": "={{ $('Split Out').item.json.question }}",
+              "type": "string"
+            },
+            {
+              "id": "7cdd55d1-1e5a-4657-a1b3-14eaa101c14d",
+              "name": "answer",
+              "value": "={{ $('HTTP Request /chat').item.json.answer }}",
+              "type": "string"
+            },
+            {
+              "id": "429241a6-ada1-461d-85f1-122fe849ed20",
+              "name": "latency_ms",
+              "value": "={{ $('HTTP Request /chat').item.json.latency_ms }}",
+              "type": "number"
+            },
+            {
+              "id": "9600af65-a743-4f32-92a9-c8e04a2d475e",
+              "name": "abstained",
+              "value": "={{ $('HTTP Request /chat').item.json.abstained }}",
+              "type": "boolean"
+            },
+            {
+              "id": "9caca197-2806-48a5-b709-4fb37b3abd07",
+              "name": "abstention_reason",
+              "value": "={{ $('HTTP Request /chat').item.json.abstention_reason }}",
+              "type": "string"
+            },
+            {
+              "id": "aee093fd-bc0f-44ed-b0d7-1fde0e46cecc",
+              "name": "best_score",
+              "value": "={{ $('HTTP Request /chat').item.json.best_score }}",
+              "type": "number"
+            },
+            {
+              "id": "5e7c34be-809a-4d39-aa45-1be8cd5fbcd7",
+              "name": "keyword_coverage",
+              "value": "={{ $('HTTP Request /chat').item.json.keyword_coverage }}",
+              "type": "number"
+            },
+            {
+              "id": "a88ec74a-9441-471b-97f4-f14dac53572d",
+              "name": "sufficient_context",
+              "value": "={{ $('HTTP Request /chat').item.json.sufficient_context }}",
+              "type": "boolean"
+            },
+            {
+              "id": "f4d2b4e0-4754-489a-8fb4-43289a48caca",
+              "name": "retrieved_chunks_count",
+              "value": "={{ $('HTTP Request /chat').item.json.retrieved_chunks_count }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1408,
+        -352
+      ],
+      "id": "9e82984e-eb28-4577-af5f-ac3707a87e63",
+      "name": "fallaAlucinacion"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a48039ba-4d3a-4d80-879a-b3cafdb1daed",
+              "leftValue": "={{ $('ResultadoCaso').item.json.abstained }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        48
+      ],
+      "id": "d184344b-ed3b-4a4b-94a1-80d39332a19b",
+      "name": "RespuestaNoSobreabstiene"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d55e9f8a-1323-4811-b980-39f7d34831fb",
+              "leftValue": "={{ $('ResultadoCaso').item.json.abstained }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "119327b1-4eea-41a2-b9ab-cf1396779375",
+              "leftValue": "={{ $('ResultadoCaso').item.json.answer }}",
+              "rightValue": "=No encontre suficiente informacion en la base de conocimiento para responder tu pregunta.",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        -480
+      ],
+      "id": "1ab3d4f1-1a15-4764-8eaf-1835c6d5d6f2",
+      "name": "AbstencionCorrecta"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58117a10-46d4-4ce9-8b98-0b8658058447",
+              "name": "evaluation",
+              "value": "passed_abstention",
+              "type": "string"
+            },
+            {
+              "id": "8be84740-c280-4c92-8382-35d2d2993e29",
+              "name": "reason",
+              "value": "={{ $json.abstention_reason || \"expected_abstention_met\" }}",
+              "type": "string"
+            },
+            {
+              "id": "4c9017ee-f87b-4ed8-bf60-0a731baa674d",
+              "name": "question",
+              "value": "={{ $('Split Out').item.json.question }}",
+              "type": "string"
+            },
+            {
+              "id": "aadfbb1c-9152-427d-8a1a-358e9548d8b3",
+              "name": "answer",
+              "value": "={{ $('HTTP Request /chat').item.json.answer }}",
+              "type": "string"
+            },
+            {
+              "id": "4fd416a8-0ddf-4565-8d8e-abd00b3a0678",
+              "name": "latency_ms",
+              "value": "={{ $('HTTP Request /chat').item.json.latency_ms }}",
+              "type": "number"
+            },
+            {
+              "id": "fa5a51b4-5cff-4d98-a01a-9fc9089bbfae",
+              "name": "abstained",
+              "value": "={{ $('HTTP Request /chat').item.json.abstained }}",
+              "type": "boolean"
+            },
+            {
+              "id": "b3cbe81f-4cbd-4194-94e6-39e69612e947",
+              "name": "abstention_reason",
+              "value": "={{ $('HTTP Request /chat').item.json.abstention_reason }}",
+              "type": "string"
+            },
+            {
+              "id": "dde4839d-9442-41d3-a6da-3c5d8d7e094e",
+              "name": "best_score",
+              "value": "={{ $('HTTP Request /chat').item.json.best_score }}",
+              "type": "number"
+            },
+            {
+              "id": "3d14509b-5e8a-42f8-a174-6cf1b58bd3c3",
+              "name": "keyword_coverage",
+              "value": "={{ $('HTTP Request /chat').item.json.keyword_coverage }}",
+              "type": "number"
+            },
+            {
+              "id": "cad7b525-6136-4d96-85d0-49a3fc2d9fc1",
+              "name": "sufficient_context",
+              "value": "={{ $('HTTP Request /chat').item.json.sufficient_context }}",
+              "type": "boolean"
+            },
+            {
+              "id": "5e383858-9c03-4ef3-b766-18522256cfe7",
+              "name": "retrieved_chunks_count",
+              "value": "={{ $('HTTP Request /chat').item.json.retrieved_chunks_count }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1408,
+        -608
+      ],
+      "id": "2bf69464-2207-45ed-a14c-eb905f81242b",
+      "name": "abstencionPasada"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36cd89f1-f9e3-42e1-9570-288331814fbf",
+              "name": "evaluation",
+              "value": "failed_over_abstention",
+              "type": "string"
+            },
+            {
+              "id": "956ace03-5b5f-4eb8-a925-205ed9b8e0d1",
+              "name": "reason",
+              "value": "model_abstained_when_should_answer",
+              "type": "string"
+            },
+            {
+              "id": "339aa619-aa19-4ea0-a2e6-747222c0022c",
+              "name": "question",
+              "value": "={{ $('Split Out').item.json.question }}",
+              "type": "string"
+            },
+            {
+              "id": "fc84e8e2-bc32-4158-942c-69c7e1606ea5",
+              "name": "answer",
+              "value": "={{ $('HTTP Request /chat').item.json.answer }}",
+              "type": "string"
+            },
+            {
+              "id": "d9caf706-2d6e-4c51-8deb-e597119cf224",
+              "name": "latency_ms",
+              "value": "={{ $('HTTP Request /chat').item.json.latency_ms }}",
+              "type": "number"
+            },
+            {
+              "id": "1621f56a-0036-4e3a-a221-bb0ec1c470ec",
+              "name": "abstained",
+              "value": "={{ $('HTTP Request /chat').item.json.abstained }}",
+              "type": "boolean"
+            },
+            {
+              "id": "e5614c97-d2a2-446f-b8e5-4bd0e3c09546",
+              "name": "abstention_reason",
+              "value": "={{ $('HTTP Request /chat').item.json.abstention_reason }}",
+              "type": "string"
+            },
+            {
+              "id": "d8ba3fbb-8402-4b3c-9432-2417d11039da",
+              "name": "best_score",
+              "value": "={{ $('HTTP Request /chat').item.json.best_score }}",
+              "type": "number"
+            },
+            {
+              "id": "5df11651-2cda-498a-88db-120b0201b63a",
+              "name": "keyword_coverage",
+              "value": "={{ $('HTTP Request /chat').item.json.keyword_coverage }}",
+              "type": "number"
+            },
+            {
+              "id": "a655f04a-5541-403e-ab88-7afff885b96b",
+              "name": "sufficient_context",
+              "value": "={{ $('HTTP Request /chat').item.json.sufficient_context }}",
+              "type": "boolean"
+            },
+            {
+              "id": "969d7d26-f0d4-46d9-94a8-417e4b97fea9",
+              "name": "retrieved_chunks_count",
+              "value": "={{ $('HTTP Request /chat').item.json.retrieved_chunks_count }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1936,
+        288
+      ],
+      "id": "9b7fc1f7-53b7-458b-8072-52b24db63113",
+      "name": "fallaSobreabstencion"
+    },
+    {
+      "parameters": {
+        "jsCode": "function safeAll(nodeName) {\n  try {\n    return $(nodeName).all().map(i => i.json);\n  } catch (e) {\n    return [];\n  }\n}\n\nconst rows = [\n  ...safeAll('abstencionPasada'),\n  ...safeAll('fallaAlucinacion'),\n  ...safeAll('fallaSobreabstencion'),\n  ...safeAll('respuestaPasable'),\n  ...safeAll('fallaRespuestaCalidad'),\n];\n\nconst total_cases = rows.length;\nconst passed_answered = rows.filter(r => r.evaluation === 'passed_answered').length;\nconst passed_abstention = rows.filter(r => r.evaluation === 'passed_abstention').length;\nconst failed_hallucinated = rows.filter(r => r.evaluation === 'failed_hallucinated').length;\nconst failed_over_abstention = rows.filter(r => r.evaluation === 'failed_over_abstention').length;\nconst failed_answer_quality = rows.filter(r => r.evaluation === 'failed_answer_quality').length;\n\nconst average_latency_ms = total_cases\n  ? Math.round(rows.reduce((acc, r) => acc + (r.latency_ms || 0), 0) / total_cases)\n  : 0;\n\nreturn [\n  {\n    json: {\n      total_cases,\n      passed_answered,\n      passed_abstention,\n      failed_hallucinated,\n      failed_over_abstention,\n      failed_answer_quality,\n      average_latency_ms,\n      results: rows\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2208,
+        -336
+      ],
+      "id": "c7c22058-2b3d-4912-a12f-b8de702fb66f",
+      "name": "ResumenBatch"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3b40eec4-1083-4672-b666-3501f0a355f5",
+              "leftValue": "={{ $json.has_context_support }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "32c2aac6-c470-4803-b085-4f8b204cd4d2",
+              "leftValue": "={{ $json.has_min_sources }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "3750c54c-e28c-4e09-b748-c46be93051a6",
+              "leftValue": "={{ $json.has_keyword_support }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "6c61410a-69c6-4a1b-8439-c8b42762886f",
+              "leftValue": "={{ $json.is_no_info_message }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "283287ed-1174-4229-98b1-9b95ab80d39c",
+              "leftValue": "={{ $json.looks_answered }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        -80
+      ],
+      "id": "d2c81730-4277-4678-a2fd-e8e7ae5a02fa",
+      "name": "RespuestaAceptable"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9bfa42d8-bde0-40fe-9b88-09f83dcd0624",
+              "name": "evaluation",
+              "value": "passed_answered",
+              "type": "string"
+            },
+            {
+              "id": "a3d760e6-4623-4623-8244-8223af58f4fe",
+              "name": "reason",
+              "value": "response_with_sufficient_context",
+              "type": "string"
+            },
+            {
+              "id": "c619c4ec-f5ee-4424-8fca-7d129c5703ab",
+              "name": "question",
+              "value": "={{ $('Split Out').item.json.question }}",
+              "type": "string"
+            },
+            {
+              "id": "cbbdf486-775a-4eae-8e41-f6faf772597f",
+              "name": "answer",
+              "value": "={{ $('HTTP Request /chat').item.json.answer }}",
+              "type": "string"
+            },
+            {
+              "id": "948efaf4-4d72-4da3-a5ac-1fea9bb4bfda",
+              "name": "latency_ms",
+              "value": "={{ $('HTTP Request /chat').item.json.latency_ms }}",
+              "type": "number"
+            },
+            {
+              "id": "a058ea71-c718-4107-a5cd-1836ae7541c8",
+              "name": "abstained",
+              "value": "={{ $('HTTP Request /chat').item.json.abstained }}",
+              "type": "boolean"
+            },
+            {
+              "id": "f392a7c8-bfdc-4b32-a0dc-33813d980bac",
+              "name": "abstention_reason",
+              "value": "={{ $('HTTP Request /chat').item.json.abstention_reason }}",
+              "type": "string"
+            },
+            {
+              "id": "2ef3c021-2ff7-495d-970a-abe763c71923",
+              "name": "best_score",
+              "value": "={{ $('HTTP Request /chat').item.json.best_score }}",
+              "type": "number"
+            },
+            {
+              "id": "688ad255-348d-47ab-974e-fd2f37a008ad",
+              "name": "keyword_coverage",
+              "value": "={{ $('HTTP Request /chat').item.json.keyword_coverage }}",
+              "type": "number"
+            },
+            {
+              "id": "97900ec0-2d30-40cd-9e53-990a993d5260",
+              "name": "sufficient_context",
+              "value": "={{ $('HTTP Request /chat').item.json.sufficient_context }}",
+              "type": "boolean"
+            },
+            {
+              "id": "ecfc3078-3f85-4ea6-b764-68842d2cbaa7",
+              "name": "retrieved_chunks_count",
+              "value": "={{ $('HTTP Request /chat').item.json.retrieved_chunks_count }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1920,
+        -176
+      ],
+      "id": "73f2a222-0c68-4f16-875f-52f37c21d53a",
+      "name": "respuestaPasable"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9245ec84-1ceb-44fd-a936-9cf98f3ded52",
+              "name": "evaluation",
+              "value": "failed_answer_quality",
+              "type": "string"
+            },
+            {
+              "id": "a9f8bbe4-82cd-4129-ba00-fbe248446056",
+              "name": "reason",
+              "value": "low_context_or_low_coverage",
+              "type": "string"
+            },
+            {
+              "id": "b144aca1-f386-4fa0-8896-2d27c149d921",
+              "name": "question",
+              "value": "={{ $('Split Out').item.json.question }}",
+              "type": "string"
+            },
+            {
+              "id": "b6b67bd1-8dd2-4943-9a5a-328f6f9f2632",
+              "name": "answer",
+              "value": "={{ $('HTTP Request /chat').item.json.answer }}",
+              "type": "string"
+            },
+            {
+              "id": "89ccd74b-a082-4262-931e-36cfbb3f727e",
+              "name": "latency_ms",
+              "value": "={{ $('HTTP Request /chat').item.json.latency_ms }}",
+              "type": "number"
+            },
+            {
+              "id": "ffabcda6-4cdf-4a02-83f7-be6e826092a4",
+              "name": "abstained",
+              "value": "={{ $('HTTP Request /chat').item.json.abstained }}",
+              "type": "boolean"
+            },
+            {
+              "id": "7fa2c459-20e5-42d4-8b1a-2234605d3f59",
+              "name": "abstention_reason",
+              "value": "={{ $('HTTP Request /chat').item.json.abstention_reason }}",
+              "type": "string"
+            },
+            {
+              "id": "af732e2a-e263-40cd-acac-4817a9373113",
+              "name": "best_score",
+              "value": "={{ $('HTTP Request /chat').item.json.best_score }}",
+              "type": "number"
+            },
+            {
+              "id": "c4192582-7708-4153-bdaa-dffd30efd58a",
+              "name": "keyword_coverage",
+              "value": "={{ $('HTTP Request /chat').item.json.keyword_coverage }}",
+              "type": "number"
+            },
+            {
+              "id": "d4f39ec5-00c5-4dbf-bba3-92b9a0ce3eeb",
+              "name": "sufficient_context",
+              "value": "={{ $('HTTP Request /chat').item.json.sufficient_context }}",
+              "type": "boolean"
+            },
+            {
+              "id": "1b8b1ab2-28f6-44f1-b234-3739ae3b60c7",
+              "name": "retrieved_chunks_count",
+              "value": "={{ $('HTTP Request /chat').item.json.retrieved_chunks_count }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1936,
+        0
+      ],
+      "id": "311079ad-15d1-4814-a99d-be2acb907514",
+      "name": "fallaRespuestaCalidad"
+    },
+    {
+      "parameters": {
+        "jsCode": "const noInfoMessage = 'no encontre suficiente informacion en la base de conocimiento para responder tu pregunta.';\n\nreturn $input.all().map((item, i) => {\n  const resultadoCaso = $('ResultadoCaso').itemMatching(i).json;\n\n  const answer = (resultadoCaso.answer || '').trim();\n  const normalizedAnswer = answer\n    .toLowerCase()\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .trim();\n\n  const retrievedChunksCount = Number(\n    resultadoCaso.retrieved_chunks_count ??\n    resultadoCaso.sources_count ??\n    0\n  );\n\n  const minSources = Number(\n    item.json.min_sources ??\n    resultadoCaso.min_sources ??\n    0\n  );\n\n  const keywordCoverage = Number(resultadoCaso.keyword_coverage || 0);\n  const hasContextSupport = resultadoCaso.sufficient_context === true;\n  const hasKeywordSupport = keywordCoverage >= 0.5;\n  const hasMinSources = retrievedChunksCount >= minSources;\n  const isNoInfoMessage = normalizedAnswer === noInfoMessage;\n  const looksAnswered = !isNoInfoMessage && answer.length > 0;\n  const expectsAbstention = item.json.expects_abstention ?? false;\n  const abstained = resultadoCaso.abstained === true;\n\n  const isAbstentionEffective = abstained || isNoInfoMessage;\n\n  const shouldBeOverAbstentionCandidate =\n    !expectsAbstention &&\n    isAbstentionEffective &&\n    hasContextSupport &&\n    hasMinSources;\n\n  const answerQualityReady =\n    !expectsAbstention &&\n    !isAbstentionEffective &&\n    hasContextSupport &&\n    hasMinSources &&\n    hasKeywordSupport &&\n    looksAnswered;\n\n  let classificationHint = 'undetermined';\n  let reasonHint = 'needs_review';\n\n  if (expectsAbstention && isAbstentionEffective) {\n    classificationHint = 'passed_abstention';\n    reasonHint = 'expected_abstention_met';\n  } else if (expectsAbstention && !isAbstentionEffective) {\n    classificationHint = 'failed_hallucinated';\n    reasonHint = 'answered_when_should_abstain';\n  } else if (shouldBeOverAbstentionCandidate) {\n    classificationHint = 'failed_over_abstention';\n    reasonHint = 'abstained_despite_sufficient_context';\n  } else if (answerQualityReady) {\n    classificationHint = 'passed_answered';\n    reasonHint = 'response_with_sufficient_context';\n  } else if (!expectsAbstention) {\n    classificationHint = 'failed_answer_quality';\n    reasonHint = 'answer_quality_not_met';\n  }\n\n  return {\n    json: {\n      ...item.json,\n      ...resultadoCaso,\n      min_sources: minSources,\n      retrieved_chunks_count: retrievedChunksCount,\n      normalized_answer: normalizedAnswer,\n      answer_length: answer.length,\n      expects_abstention: expectsAbstention,\n      is_no_info_message: isNoInfoMessage,\n      has_context_support: hasContextSupport,\n      has_keyword_support: hasKeywordSupport,\n      has_min_sources: hasMinSources,\n      looks_answered: looksAnswered,\n      is_abstention_effective: isAbstentionEffective,\n      should_be_over_abstention_candidate: shouldBeOverAbstentionCandidate,\n      answer_quality_ready: answerQualityReady,\n      classification_hint: classificationHint,\n      reason_hint: reasonHint\n    },\n    pairedItem: { item: i }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        -64
+      ],
+      "id": "dffefb07-0da1-4a91-8d8e-3865be56d04d",
+      "name": "validacionRespuesta"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "inicio": {
+      "main": [
+        [
+          {
+            "node": "CasosEvaluacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CasosEvaluacion": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request /chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request /chat": {
+      "main": [
+        [
+          {
+            "node": "ResultadoCaso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ResultadoCaso": {
+      "main": [
+        [
+          {
+            "node": "TipoEsperado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TipoEsperado": {
+      "main": [
+        [
+          {
+            "node": "EvaluarAbstencionEsperada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EvaluarAbstencionEsperada": {
+      "main": [
+        [
+          {
+            "node": "AbstencionCorrecta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "RespuestaNoSobreabstiene",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RespuestaNoSobreabstiene": {
+      "main": [
+        [
+          {
+            "node": "validacionRespuesta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "fallaSobreabstencion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AbstencionCorrecta": {
+      "main": [
+        [
+          {
+            "node": "abstencionPasada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "fallaAlucinacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "abstencionPasada": {
+      "main": [
+        [
+          {
+            "node": "ResumenBatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fallaSobreabstencion": {
+      "main": [
+        [
+          {
+            "node": "ResumenBatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RespuestaAceptable": {
+      "main": [
+        [
+          {
+            "node": "respuestaPasable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "fallaRespuestaCalidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "respuestaPasable": {
+      "main": [
+        [
+          {
+            "node": "ResumenBatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fallaRespuestaCalidad": {
+      "main": [
+        [
+          {
+            "node": "ResumenBatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fallaAlucinacion": {
+      "main": [
+        [
+          {
+            "node": "ResumenBatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validacionRespuesta": {
+      "main": [
+        [
+          {
+            "node": "RespuestaAceptable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3525549f-ed16-42de-8480-1d929037dd47",
+  "meta": {
+    "instanceId": "d0b50d5f25af84cf043cdac3fdb43c0110719937036e7ded324746f832c10540"
+  },
+  "id": "Ww7RfLqCFj4RCj98",
+  "tags": []
+}

@@ -1,0 +1,208 @@
+{
+  "name": "PreguntasChat",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -48
+      ],
+      "id": "412337f4-aad0-4f40-8ff3-e361a0bd6120",
+      "name": "Inicio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "030117d0-94ff-4eae-94c9-3fa0bf537ec6",
+              "name": "question",
+              "value": "Resume los objetivos de Fundamentos de Programación",
+              "type": "string"
+            },
+            {
+              "id": "8f9e9b12-b76f-497e-9c96-505a8f46763c",
+              "name": "course",
+              "value": "Fundamentos de Programación",
+              "type": "string"
+            },
+            {
+              "id": "2964ed43-b10d-4c70-ac9c-665066f43107",
+              "name": "top_k",
+              "value": 3,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        -48
+      ],
+      "id": "76711b77-4773-4d9b-bad8-de7010854531",
+      "name": "valores"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7a04c911-04ff-4f74-9504-9b37fd0afd8f",
+              "leftValue": "={{ $json.sources.length }}",
+              "rightValue": "=0",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        384,
+        -48
+      ],
+      "id": "b3b99e0e-dc0b-4add-a22e-fc285eae8309",
+      "name": "verificacion"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8000/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"question\": \"{{ $json.question }}\",\n  \"course\": \"{{ $json.course }}\",\n  \"top_k\": {{ $json.top_k }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        -48
+      ],
+      "id": "b917e3c5-61f1-4005-ba46-24b7fcf28515",
+      "name": "respuesta"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"status\": \"Sin contexto\",\n  \"question\": \"{{ $node['valores'].json.question }}\",\n  \"answer\": \"{{ $json.answer }}\",\n  \"course\": \"{{ $json.course }}\",\n  \"latency_ms\": {{ $json.latency_ms }},\n  \"sources_count\": 0\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        48
+      ],
+      "id": "d9cc810b-0d13-489f-8a14-27a6243b457d",
+      "name": "Sin contexto"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"status\": \"ok\",\n  \"question\": \"{{ $node['valores'].json.question }}\",\n  \"answer\": \"{{ $json.answer }}\",\n  \"course\": \"{{ $json.course }}\",\n  \"latency_ms\": {{ $json.latency_ms }},\n  \"sources_count\": {{ $json.sources.length }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        -144
+      ],
+      "id": "ac968f87-6361-4f2f-86cf-a4ae5e2f96d2",
+      "name": "Respuesta valida"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Inicio": {
+      "main": [
+        [
+          {
+            "node": "valores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "valores": {
+      "main": [
+        [
+          {
+            "node": "respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificacion": {
+      "main": [
+        [
+          {
+            "node": "Respuesta valida",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sin contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "respuesta": {
+      "main": [
+        [
+          {
+            "node": "verificacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7522dda4-b3b1-45d9-8327-a07b23486ccf",
+  "meta": {
+    "instanceId": "d0b50d5f25af84cf043cdac3fdb43c0110719937036e7ded324746f832c10540"
+  },
+  "id": "VSJyd5LLASRPvU8b",
+  "tags": []
+}

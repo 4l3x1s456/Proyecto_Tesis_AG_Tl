@@ -1,0 +1,102 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eva_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - eva_net
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: eva_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=eva_db
+      - POSTGRES_USER=eva_user
+      - POSTGRES_PASSWORD=eva_pass
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_TIMEOUT=180
+    depends_on:
+      - postgres
+      - qdrant
+      - ollama
+    networks:
+      - eva_net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: eva_postgres
+    environment:
+      POSTGRES_DB: eva_db
+      POSTGRES_USER: eva_user
+      POSTGRES_PASSWORD: eva_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - eva_net
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: eva_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - eva_net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: eva_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - eva_net
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: eva_n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=eva_db
+      - DB_POSTGRESDB_USER=eva_user
+      - DB_POSTGRESDB_PASSWORD=eva_pass
+    depends_on:
+      - postgres
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - eva_net
+
+networks:
+  eva_net:
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  ollama_data:
+  n8n_data:
